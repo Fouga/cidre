@@ -174,10 +174,10 @@ parfor z = 1:options.ALLnum_images_provided
         end
         I = imread(NAMES{z});
     end
-    I = double(I);
+%     I = double(I);
 %         maxI = max(maxI, max(I(:)));
     Irescaled = imresize(I, [R C]);
-    S_all(:,:,z) = Irescaled;
+    S_all(:,:,z) = double(Irescaled);
 
 end
 
@@ -207,18 +207,17 @@ end
 %         cdr_gui_toggle(options)
 %     end
 % else
+
     % same model for all the optical sections
     optical_section = 0;
     [S, options] = cdr_loadImages(source, options,optical_section, S_all);
     [model, options] = cdr_cidreModel(S,options);
-     % correct the source images, if requested
-%      cdr_correct(model,options, optical_section);
 
     % save the correction model to the destination folder
-    channel = str2double(filter(end));
+    chanel = str2double(filter(end));
     filename = sprintf('%s%s', options.folder_destination, ...
-        sprintf('cidre_channel%i_optical_section_%i.mat',channel,optical_section));
-    save(filename, 'model');
+        sprintf('/cidre_chanel%i_optical_section_%i.mat',chanel,optical_section));
+    save( filename, 'model');
 %              cdr_gui_toggle(options)
 % end
     

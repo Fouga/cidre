@@ -5,7 +5,7 @@ layer=coords(2); %optical section
 chan=coords(5);
 optical_section = 0;
 % find mat files
-fname = [avDir sprintf('/cidre_channel%i_optical_section_%i.mat',chan,optical_section)];
+fname = [avDir sprintf('/cidre_chanel%i_optical_section_%i.mat',chan,optical_section)];
 % how cidre model structure should look like
 model_def.method    = 'CIDRE';
 model_def.v         = [];

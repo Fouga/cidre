@@ -1,4 +1,4 @@
-function [S options] = cdr_loadImages(source, options)  
+function [S options] = cdr_loadImages(source, options, optical_section, S_all)  
 % Loads the raw images into a STACK of images, or accepts a stack of images
 % passed as an argument. Performs resizing, sorting, and compressing of the
 % image data to keep the model generation fast.
@@ -40,54 +40,57 @@ function [S options] = cdr_loadImages(source, options)
 % Matlab offers an alternative (slower) implementation in the function 
 % fminlbfgs.
 
-S           = [];   %#ok<NASGU> the array containing the image data returned to CIDRE
+% S           = [];   %#ok<NASGU> the array containing the image data returned to CIDRE
 maxI        = 0;    % the max intensity found in the supplied images
 
 
-
-% list of filetypes imread can open
-valid_filetypes = {'.bmp', '.gif', '.jpg', '.jpeg', '.tif', '.tiff', '.png',...
-                   '.BMP', '.GIF', '.JPG', '.JPEG', '.TIF', '.TIFF', '.PNG'};
 
 
 %% obtain an array S, containing the source image data at the working image
 %% size. S can be loaded from a source path (+filter) or from an array 
 %% passed as an argument
-if ischar(source)
     % source is a char defining the path (+filter) of files to open
 
     
     % break source into a path, filter, and extension
     [pth filter ext] = fileparts(source);
-    pth = [pth '/'];
     
-    % store the source path in the options structure
-    options.folder_source = pth;    
     
     % check if a file filter is provided, if so use it to generate a list
     % of source filenames
-    if ~isempty(filter)
-        d = dir([options.folder_source filter ext]);
-        options.filenames = cell(numel(d),1);
-        for i = 1:numel(d)
-            options.filenames{i} = d(i).name;
-        end
-        
-        
-    % if a file filter is not provided, generate a list of source filanames
-    % searching for all valid filetypes
-    else
-        for k = 1:numel(valid_filetypes)
-            d = dir([options.folder_source '*' valid_filetypes{k}]);
-            for i = 1:numel(d)
-                options.filenames{end+1} = d(i).name;
-            end
-            options.num_images_provided = numel(options.filenames);
-        end
-        options.filenames = options.filenames';
-        
-    end
+    mosaicFile=getTiledAcquisitionParamFile;
+    param=readMetaData2Stitchit(mosaicFile);
+    numTiles = param.numTiles.X*param.numTiles.Y;
+    numOptsec = param.mosaic.numOpticalPlanes;
+    indsec = 0:numOptsec-1;
+    start = indsec.*numTiles;
+    d = options.ALLfilenames;
     
+        if optical_section == 0
+            ind = 1:options.ALLnum_images_provided;
+        else
+            tile_start = start(optical_section):numOptsec*numTiles:options.ALLnum_images_provided-1; % number of data sets
+            tile_array = repmat(tile_start,numTiles,1);
+            array_plus = repmat(0:numTiles-1,size(tile_array,2),1);
+            tile_num = tile_array+array_plus';
+            tile_num = reshape(tile_num,1,size(tile_num,1)*size(tile_num,2));
+            opt_section_load = zeros(1,options.ALLnum_images_provided);
+            for sec_num = 1:options.ALLnum_images_provided
+                str = d{sec_num};
+                index_chanel = strfind(str, [filter(2:end) ext]);
+                index_tire = strfind(str, '-');
+                opt_section_load(sec_num) = abs(sscanf(str(index_tire(end):index_chanel), '%i', str2num(filter(end))));
+            end
+            [ind val] = ismember(opt_section_load,tile_num);
+        end
+            d = d(ind);
+            % save filenames of the same optical sections or all the images
+            % in case of no separation of the sections
+            options.filenames = cell(numel(d),1);
+            for i = 1:numel(d)
+                options.filenames{i} = d{i};
+            end
+        
     % check if we have found any valid files in the folder
     if numel(options.filenames) == 0
         error('CIDRE:loadImages', 'No files found.'); 
@@ -95,67 +98,10 @@ if ischar(source)
     
     % store the number of source images into the options structure
     options.num_images_provided = numel(options.filenames);
-    
-    % read the first provided image, check that it is monochromatic, store 
-    % its size in the options structure, and determine the working image 
-    % size we will use
-    I = imread([options.folder_source options.filenames{1}]);
-    if numel(size(I)) == 3
-        error('CIDRE:loadImages', 'Non-monochromatic image provided. CIDRE is designed for monochromatic images. Store each channel as a separate image and re-run CIDRE.'); 
-    end
-    options.image_size = size(I);
-    [R C] = determine_working_size(options.image_size, options.target_num_pixels);
-    options.working_size = [R C];
-    
-    
-    % read the source filenames in, covert them to the working image size, 
-    % and add them to the stack    
-    fprintf(' Reading %d images from %s\n .', options.num_images_provided, options.folder_source);
-    t1 = tic;
-    S = zeros([options.working_size options.num_images_provided]);
-    for z = 1:options.num_images_provided
-        if mod(z,100) == 0; fprintf('.'); end  % progress to the command line
-        I = imread([options.folder_source options.filenames{z}]);
-        I = double(I);
-        maxI = max(maxI, max(I(:)));
-        Irescaled = imresize(I, options.working_size);
-        S(:,:,z) = Irescaled;
-    end
-    fprintf('finished in %1.2fs.\n', toc(t1));
-    
-else
-    % source is a HxWxZ array containing the image stack
-    
-    if isempty(options.image_size)
-        warning('CIDRE:loadImages', 'Original image size not provided, assuming %d x %d (size of passed stack)\n', size(source,1), size(source,2));
-        options.image_size = [size(source,1) size(source,2)];
-    end
-    
-    % determine the working image size
-    [R C] = determine_working_size(options.image_size, options.target_num_pixels);
-    options.working_size = [R C];
-    
-    % store the number of source images provided in the stack
-    options.num_images_provided = size(source,3);    
-    
-    % give some feedback to the command line
-    fprintf(' Image stack passed as an argument (%d images). Resizing\n .', options.num_images_provided);
-    t1 = tic;
-    
-    % resize each element of the stack to the working image size
-    if isempty(options.bit_depth); maxI = max(source(:)); end   % if bit depth is not provided, we need maxI to estimate it
-    S = zeros([options.working_size options.num_images_provided]);
-    for z = 1:options.num_images_provided
-        if mod(z,100) == 0; fprintf('.'); end  % progress to the command line
-        I = source(:,:,z);
-        I = double(I);
-        Irescaled = imresize(I, options.working_size);
-        S(:,:,z) = Irescaled;
-    end
-    fprintf('finished in %1.2fs.\n', toc(t1));
-end
-
-
+   
+     S = S_all(:,:,ind);
+     maxI = max(max(max(S)));
+%     fprintf('finished in %1.2fs.\n', toc(t1));
 
 %% apply several processing steps to the image stack S
 % Now that we have loaded the stack as an RxCxN array (where R*C ~=
@@ -163,6 +109,21 @@ end
 % intensity information in the stack, sort the intensity values at each
 % (x,y) image location, and compress the stack in the 3rd dimension to keep
 % the computation time manageable
+% 
+% options = get_bit_depth(options, maxI); % store the bit depth of the images in options, needed for entropy measurement
+% entropy = get_entropy(S, options);      % compute the stack's entropy
+% 
+% N       = size(S,3);    % number of images in the stack
+% a       = 7.838e+06;    % parameters of a fitted exponential function
+% b       = -1.948;       % parameters of a fitted exponential function
+% c       = 20;           % parameters of a fitted exponential function
+% N_required = a*exp(b*entropy) + c; 
+% if N < N_required
+% %     S = S_all;
+% %     maxI = max(max(max(S)));
+%     fprintf('There is enough contrast in the channel\n')
+% end
+
 [S options] = cdr_preprocessData(S, maxI, options);
 
 
@@ -174,22 +135,76 @@ end
 
 
 
+% 
+% 
+% 
+% 
+% function [R_working C_working] = determine_working_size(image_size, N_desired)
+% % determines a working image size based on the original image size and
+% % the desired number of pixels in the working image, N_desired
+% 
+% 
+% R_original = image_size(1);
+% C_original = image_size(2);
+% 
+% scale_working = sqrt( N_desired/(R_original*C_original));
+% 
+% R_working = round(R_original * scale_working);
+% C_working = round(C_original * scale_working);
+% 
+% 
+% 
+% function options = get_bit_depth(options, maxI)
+% % Sets options.bit_depth describing the provided images as 8-bit, 12-bit, or 
+% % 16-bit. If options.bit_depth is provided, it is used. Otherwise the bit 
+% % depth is estimated from the max observed intensity, maxI.
+% 
+% if ~isempty(options.bit_depth)
+%     if ~ismember(options.bit_depth, [2^8 2^12 2^16])
+%         error('CIDRE:loadImages', 'Provide bit depth as max integer value, eg 2^12');
+%     else
+%         fprintf(' %d-bit depth\n', log2(options.bit_depth));
+%     end
+% else    
+%     if maxI > 2^12
+%         options.bit_depth = 2^16;
+%     elseif maxI > 2^8
+%         options.bit_depth = 2^12;
+%     else
+%         options.bit_depth = 2^8;
+%     end    
+%     fprintf(' %d-bit depth images (estimated from max intensity=%1.0f)\n', log2(options.bit_depth), maxI);
+% end
 
 
-
-
-function [R_working C_working] = determine_working_size(image_size, N_desired)
-% determines a working image size based on the original image size and
-% the desired number of pixels in the working image, N_desired
-
-
-R_original = image_size(1);
-C_original = image_size(2);
-
-scale_working = sqrt( N_desired/(R_original*C_original));
-
-R_working = round(R_original * scale_working);
-C_working = round(C_original * scale_working);
+% 
+% function H = get_entropy(S, options)
+% % gets the entropy of an image stack. A very low entropy indicates that
+% % there may be insufficient intensity information to build a good model.
+% % This can happen when only a few images are provided and the background
+% % does not provide helpful information. For example in low confluency
+% % fluorescence images from a glass slide, the background pixels have nearly
+% % zero contribution from incident light and do not provide useful
+% % information.
+% 
+% 
+% % set one bin for every potential intensity level
+% bins = 1:options.bit_depth;
+% 
+% % get a distrubtion representing all of S
+% P = hist(S(:),bins);
+% P = P/sum(P);
+% 
+% % compute the entropy of the distribution
+% if sum(~isfinite(P(:)))
+%    error('CIDRE:loadImages', 'the inputs contain non-finite values!') 
+% end
+% P = P(:) ./ sum(P(:));
+% P(P == 0) = []; % In the case of p(xi) = 0 for some i, the value of the 
+%                 % corresponding sum and 0 logb(0) is taken to be 0
+% temp = P .* log2(P);
+% H = -sum(temp);
+% fprintf(' Entropy of the stack = %1.2f\n', H);
 
 
 
