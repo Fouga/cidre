@@ -146,11 +146,12 @@ end
 options.image_size = size(I);
 [R C] = determine_working_size(options.image_size, options.target_num_pixels);
 options.working_size = [R C];
-
+clear I
 % preallocate memory for loaded images
 S_all = zeros([options.working_size options.ALLnum_images_provided]);
 NAMES = options.ALLfilenames;
 fprintf(' Reading %d images from %s, chanel %s\n', options.ALLnum_images_provided, options.folder_source(1:end-3), filter(end-1:end));
+
 parfor z = 1:options.ALLnum_images_provided
 %             if mod(z,100) == 0; fprintf('.'); end  % progress to the command line
     try
@@ -176,8 +177,8 @@ parfor z = 1:options.ALLnum_images_provided
     end
 %     I = double(I);
 %         maxI = max(maxI, max(I(:)));
-    Irescaled = imresize(I, [R C]);
-    S_all(:,:,z) = double(Irescaled);
+%     Irescaled = imresize(I, [R C]);
+    S_all(:,:,z) = double(imresize(I, [R C]));
 
 end
 
