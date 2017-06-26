@@ -29,8 +29,6 @@ In odre to run CIDRE correction in the [Stichit](https://github.com/BaselLaserMo
 Acknowledgements
 ============
 
-Rob Campbell for [Stichit](https://github.com/BaselLaserMouse/StitchIt) algorithm.
-
-Kevin Smith, 2015 for [CIDRE](https://github.com/smithk/cidre). 
-
-And Gus Brown for recurcive directory listing [rdir](https://uk.mathworks.com/matlabcentral/fileexchange/19550-recursive-directory-listing).
+- Rob Campbell for [Stichit](https://github.com/BaselLaserMouse/StitchIt) algorithm.
+- Kevin Smith, 2015 for [CIDRE](https://github.com/smithk/cidre). 
+- And Gus Brown for recurcive directory listing [rdir](https://uk.mathworks.com/matlabcentral/fileexchange/19550-recursive-directory-listing).
