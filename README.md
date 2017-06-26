@@ -1,8 +1,13 @@
-CIDRE
+CIDRE for tile stitching pipeline
 =====
 
 About
 -----
+This is a fork of the [CIDRE repository](https://github.com/smithk/cidre). In odre to run CIDRE correction in the Stichit pipeline, you need to download this repository and add the folder to the path. An example of use you can see on [Stichit fork](https://github.com/Fouga/StitchIt).
+The only modification of the code is concerned the way the images are loaded. It is adjusted to our in-house 2-photon microscopy data.    
+
+
+
 CIDRE is a retrospective illumination correction method for optical microscopy. It is designed to correct collections of images by building a model of the illumination distortion directly from the image data. Larger image collections provide more robust corrections. Details of the method are described in 
 <ol>
 <li>
