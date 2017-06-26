@@ -24,9 +24,11 @@ Contents
 How to use
 ------------
 
-In odre to run CIDRE correction in the [Stichit](https://github.com/BaselLaserMouse/StitchIt), you need to download this repository and add the folder to the path in the Stitchit pipeline(https://github.com/BaselLaserMouse/StitchIt). An example of use you can see on [Stichit fork](https://github.com/Fouga/StitchIt).
+In odre to run CIDRE correction in the [Stichit](https://github.com/BaselLaserMouse/StitchIt), you need to download this repository and add the folder to the path in the Stitchit pipeline(https://github.com/BaselLaserMouse/StitchIt). An example of use you can see on [Stichit fork](https://github.com/Fouga/StitchIt). 
 
+Acknowledgements
 ============
 
-Kevin Smith,2015  
-ETH Zurich (Swiss Federal Institute of Technology Zurich), Switzerland. All rights reserved.
+- Rob Campbell for [Stichit](https://github.com/BaselLaserMouse/StitchIt) algorithm.
+- Kevin Smith, 2015 for [CIDRE](https://github.com/smithk/cidre). 
+- And Gus Brown for recurcive directory listing [rdir](https://uk.mathworks.com/matlabcentral/fileexchange/19550-recursive-directory-listing).
