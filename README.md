@@ -3,9 +3,7 @@ CIDRE for tile stitching pipeline
 
 About
 -----
-This is a fork of the [CIDRE repository](https://github.com/smithk/cidre). The only modification of the code is concerned the way the images are loaded. It is adjusted to our in-house 2-photon microscopy data. The    
-
-
+This is a fork of the [CIDRE repository](https://github.com/smithk/cidre). The only modification of the code is concerned the way the images are loaded. It is adjusted to our in-house 2-photon microscopy data.   
 
 
 Details of the [CIDRE](https://github.com/smithk/cidre) algorithm are described in 
@@ -30,4 +28,5 @@ In odre to run CIDRE correction in the [Stichit](https://github.com/BaselLaserMo
 
 ============
 
-Copyright © 2015 Kevin Smith, ETH Zurich (Swiss Federal Institute of Technology Zurich), Switzerland. All rights reserved.
+Kevin Smith,2015  
+ETH Zurich (Swiss Federal Institute of Technology Zurich), Switzerland. All rights reserved.
