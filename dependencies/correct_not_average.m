@@ -1,4 +1,4 @@
-function imCorrected = correct_cidre(im,model)
+function imCorrected = correct_not_average(im,model)
 
 z  = model.z;
 v = model.v;
