@@ -1,4 +1,4 @@
-function [S options] = cdr_loadImages(source, options, optical_section, S_all)  
+function [S options] = cdr_loadImages(source, options, S_all)  
 % Loads the raw images into a STACK of images, or accepts a stack of images
 % passed as an argument. Performs resizing, sorting, and compressing of the
 % image data to keep the model generation fast.
@@ -40,8 +40,8 @@ function [S options] = cdr_loadImages(source, options, optical_section, S_all)
 % Matlab offers an alternative (slower) implementation in the function 
 % fminlbfgs.
 
-% S           = [];   %#ok<NASGU> the array containing the image data returned to CIDRE
-maxI        = 0;    % the max intensity found in the supplied images
+% S_all ;   %#ok<NASGU> the array containing the image data returned to CIDRE
+% maxI        = 0;    % the max intensity found in the supplied images
 
 
 
@@ -66,24 +66,24 @@ maxI        = 0;    % the max intensity found in the supplied images
     start = indsec.*numTiles;
     d = options.ALLfilenames;
     
-        if optical_section == 0
-            ind = 1:options.ALLnum_images_provided;
-        else
-            tile_start = start(optical_section):numOptsec*numTiles:options.ALLnum_images_provided-1; % number of data sets
-            tile_array = repmat(tile_start,numTiles,1);
-            array_plus = repmat(0:numTiles-1,size(tile_array,2),1);
-            tile_num = tile_array+array_plus';
-            tile_num = reshape(tile_num,1,size(tile_num,1)*size(tile_num,2));
-            opt_section_load = zeros(1,options.ALLnum_images_provided);
-            for sec_num = 1:options.ALLnum_images_provided
-                str = d{sec_num};
-                index_chanel = strfind(str, [filter(2:end) ext]);
-                index_tire = strfind(str, '-');
-                opt_section_load(sec_num) = abs(sscanf(str(index_tire(end):index_chanel), '%i', str2num(filter(end))));
-            end
-            [ind val] = ismember(opt_section_load,tile_num);
-        end
-            d = d(ind);
+
+    ind = 1:options.ALLnum_images_provided;
+%         else
+%             tile_start = start(optical_section):numOptsec*numTiles:options.ALLnum_images_provided-1; % number of data sets
+%             tile_array = repmat(tile_start,numTiles,1);
+%             array_plus = repmat(0:numTiles-1,size(tile_array,2),1);
+%             tile_num = tile_array+array_plus';
+%             tile_num = reshape(tile_num,1,size(tile_num,1)*size(tile_num,2));
+%             opt_section_load = zeros(1,options.ALLnum_images_provided);
+%             for sec_num = 1:options.ALLnum_images_provided
+%                 str = d{sec_num};
+%                 index_chanel = strfind(str, [filter(2:end) ext]);
+%                 index_tire = strfind(str, '-');
+%                 opt_section_load(sec_num) = abs(sscanf(str(index_tire(end):index_chanel), '%i', str2num(filter(end))));
+%             end
+%             [ind val] = ismember(opt_section_load,tile_num);
+%         end
+     d = d(ind);
             % save filenames of the same optical sections or all the images
             % in case of no separation of the sections
             options.filenames = cell(numel(d),1);
