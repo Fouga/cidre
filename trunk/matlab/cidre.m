@@ -76,7 +76,7 @@ function model = cidre(source, varargin)
 % Matlab offers an alternative (slower) implementation in the function 
 % fminlbfgs.
 %
-% The function is modified by Natalia Chicherova, Basel 2017
+% The function was modified by Natalia Chicherova, Basel 2017
 
 if nargin==0	
     help(mfilename)
@@ -88,7 +88,7 @@ if (~isdeployed)
     p = mfilename('fullpath');
     p = p(1:end-5);
     addpath([p '/3rdparty/']); 
-    addpath([p '/gui/']);
+%     addpath([p '/gui/']);
     addpath([p '/io/']);
     addpath([p '/main/']);
 end
@@ -98,11 +98,8 @@ end
 options = cdr_parseInputs(varargin);
 options.cidrePath = p;
 
-cdr_gui_toggle(options)
-
 % load all the images 
 % break source into a path, filter, and extension
-% source = fullfile(userConfig.subdir.rawDataDir,source);
 [pth filter ext] = fileparts(source);
 pth = [pth '/**/'];
 
@@ -144,7 +141,8 @@ end
 
 
 % same model for all the optical sections
-[S, options] = cdr_loadImages(source, options, S_all);
+maxI = max(max(max(S_all)));
+[S options] = cdr_preprocessData(S_all, maxI, options);
 [model, options] = cdr_cidreModel(S,options);
 
 % save the correction model to the destination folder

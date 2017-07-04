@@ -1,4 +1,6 @@
 function [S options] = cdr_loadImages(source, options, S_all)  
+% 
+
 % Loads the raw images into a STACK of images, or accepts a stack of images
 % passed as an argument. Performs resizing, sorting, and compressing of the
 % image data to keep the model generation fast.
@@ -60,14 +62,14 @@ function [S options] = cdr_loadImages(source, options, S_all)
     % of source filenames
     mosaicFile=getTiledAcquisitionParamFile;
     param=readMetaData2Stitchit(mosaicFile);
-    numTiles = param.numTiles.X*param.numTiles.Y;
-    numOptsec = param.mosaic.numOpticalPlanes;
-    indsec = 0:numOptsec-1;
-    start = indsec.*numTiles;
+%     numTiles = param.numTiles.X*param.numTiles.Y;
+%     numOptsec = param.mosaic.numOpticalPlanes;
+%     indsec = 0:numOptsec-1;
+%     start = indsec.*numTiles;
     d = options.ALLfilenames;
     
 
-    ind = 1:options.ALLnum_images_provided;
+%     ind = 1:options.ALLnum_images_provided;
 %         else
 %             tile_start = start(optical_section):numOptsec*numTiles:options.ALLnum_images_provided-1; % number of data sets
 %             tile_array = repmat(tile_start,numTiles,1);
@@ -83,24 +85,24 @@ function [S options] = cdr_loadImages(source, options, S_all)
 %             end
 %             [ind val] = ismember(opt_section_load,tile_num);
 %         end
-     d = d(ind);
+%      d = d(ind);
             % save filenames of the same optical sections or all the images
             % in case of no separation of the sections
-            options.filenames = cell(numel(d),1);
-            for i = 1:numel(d)
-                options.filenames{i} = d{i};
-            end
+%             options.filenames = cell(numel(d),1);
+%             for i = 1:numel(d)
+%                 options.filenames{i} = d{i};
+%             end
         
     % check if we have found any valid files in the folder
-    if numel(options.filenames) == 0
-        error('CIDRE:loadImages', 'No files found.'); 
-    end
+%     if numel(options.filenames) == 0
+%         error('CIDRE:loadImages', 'No files found.'); 
+%     end
     
     % store the number of source images into the options structure
-    options.num_images_provided = numel(options.filenames);
+%     options.num_images_provided = numel(options.filenames);
    
-     S = S_all(:,:,ind);
-     maxI = max(max(max(S)));
+%      S = S_all(:,:,ind);
+     maxI = max(max(max(S_all)));
 %     fprintf('finished in %1.2fs.\n', toc(t1));
 
 %% apply several processing steps to the image stack S
@@ -124,7 +126,7 @@ function [S options] = cdr_loadImages(source, options, S_all)
 %     fprintf('There is enough contrast in the channel\n')
 % end
 
-[S options] = cdr_preprocessData(S, maxI, options);
+[S options] = cdr_preprocessData(S_all, maxI, options);
 
 
 
