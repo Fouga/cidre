@@ -87,10 +87,10 @@ end
 if (~isdeployed)
     p = mfilename('fullpath');
     p = p(1:end-5);
-    addpath([p '/3rdparty/']); 
+    addpath(fullfile(p, '3rdparty')); 
 %     addpath([p '/gui/']);
-    addpath([p '/io/']);
-    addpath([p '/main/']);
+    addpath(fullfile(p, 'io'));
+    addpath(fullfile(p, 'main'));
 end
 
 
@@ -101,7 +101,7 @@ options.cidrePath = p;
 % load all the images 
 % break source into a path, filter, and extension
 [pth filter ext] = fileparts(source);
-pth = [pth '/**/'];
+pth = fullfile(pth, '**');
 
 % store the source path in the options structure
 options.folder_source = pth;  
@@ -147,8 +147,9 @@ maxI = max(max(max(S_all)));
 
 % save the correction model to the destination folder
 channel = str2double(filter(end));
-filename = sprintf('%s%s', options.folder_destination, ...
-    sprintf('/cidre_channel_%i.mat',channel));
+% filename = sprintf('%s%s', options.folder_destination, ...
+%     sprintf('/cidre_channel_%i.mat',channel));
+filename = fullfile(options.folder_destination,sprintf('cidre_channel_%i.mat',channel));
 save( filename, 'model');    
 
     
