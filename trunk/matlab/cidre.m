@@ -107,7 +107,7 @@ pth = fullfile(pth, '**');
 options.folder_source = pth;  
 options.source = source; 
 % read all the files in d
-d = rdir([options.folder_source filter ext]);
+d = rdir(fullfile(options.folder_source, [filter ext]));
 % create a new field for all file names of the channel in options.
 options.ALLfilenames = cell(numel(d),1);
 
